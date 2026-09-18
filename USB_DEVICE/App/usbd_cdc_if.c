@@ -22,7 +22,7 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "cdc_task.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -153,6 +153,7 @@ static int8_t CDC_Init_FS(void)
   /* Set Application Buffers */
   USBD_CDC_SetTxBuffer(&hUsbDeviceFS, UserTxBufferFS, 0);
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, UserRxBufferFS);
+  CDC_Task_SetUSBConnected(true);
   return (USBD_OK);
   /* USER CODE END 3 */
 }
@@ -164,6 +165,7 @@ static int8_t CDC_Init_FS(void)
 static int8_t CDC_DeInit_FS(void)
 {
   /* USER CODE BEGIN 4 */
+  CDC_Task_SetUSBConnected(false);
   return (USBD_OK);
   /* USER CODE END 4 */
 }
@@ -226,7 +228,10 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
     break;
 
     case CDC_SET_CONTROL_LINE_STATE:
-
+      if (pbuf != NULL) {
+        USBD_SetupReqTypedef *req = (USBD_SetupReqTypedef *)pbuf;
+        CDC_Task_SetUSBConnected((req->wValue & 0x0001U) != 0U);
+      }
     break;
 
     case CDC_SEND_BREAK:
@@ -259,6 +264,7 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
+  CDC_Task_ReceiveData(Buf, (uint16_t)(*Len));
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   return (USBD_OK);

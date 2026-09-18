@@ -18,8 +18,10 @@ compile_commands.json
 *.su
 *.cyclo
 
+# clangd / editor cache
+.cache/
+
 # IDE / editor
-.vscode/
 .idea/
 *.swp
 *~

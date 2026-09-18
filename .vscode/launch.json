@@ -1,0 +1,67 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ST-Link Flash + GDB Debug (Inc Build)",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/${config:metal.buildDir}/${config:metal.targetName}.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "configFiles": [
+                "${config:metal.openocdInterface}",
+                "${config:metal.openocdTarget}"
+            ],
+            "searchDir": [],
+            "armToolchainPath": "${config:metal.armToolchainBin}",
+            "gdbPath": "${config:metal.gdbPath}",
+            "device": "${config:metal.stlinkDevice}",
+            "interface": "swd",
+            "rtos": "FreeRTOS",
+            "runToEntryPoint": "main",
+            "preLaunchTask": "Build firmware inc (arm-none-eabi)",
+            "internalConsoleOptions": "openOnSessionStart",
+            "showDevDebugOutput": "none"
+        },
+        {
+            "name": "ST-Link Flash + GDB Debug (Full Build)",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/${config:metal.buildDir}/${config:metal.targetName}.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "configFiles": [
+                "${config:metal.openocdInterface}",
+                "${config:metal.openocdTarget}"
+            ],
+            "armToolchainPath": "${config:metal.armToolchainBin}",
+            "gdbPath": "${config:metal.gdbPath}",
+            "device": "${config:metal.stlinkDevice}",
+            "interface": "swd",
+            "rtos": "FreeRTOS",
+            "runToEntryPoint": "main",
+            "preLaunchTask": "Build firmware full (arm-none-eabi)",
+            "internalConsoleOptions": "openOnSessionStart",
+            "showDevDebugOutput": "none"
+        },
+        {
+            "name": "ST-Link Attach",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/${config:metal.buildDir}/${config:metal.targetName}.elf",
+            "request": "attach",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "configFiles": [
+                "${config:metal.openocdInterface}",
+                "${config:metal.openocdTarget}"
+            ],
+            "armToolchainPath": "${config:metal.armToolchainBin}",
+            "gdbPath": "${config:metal.gdbPath}",
+            "device": "${config:metal.stlinkDevice}",
+            "interface": "swd",
+            "rtos": "FreeRTOS",
+            "internalConsoleOptions": "openOnSessionStart",
+            "showDevDebugOutput": "none"
+        }
+    ]
+}

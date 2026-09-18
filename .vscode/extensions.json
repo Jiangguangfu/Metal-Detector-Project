@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "llvm-vs-code-extensions.vscode-clangd",
+        "marus25.cortex-debug",
+        "ms-vscode.cmake-tools"
+    ],
+    "unwantedRecommendations": [
+        "ms-vscode.cpptools"
+    ]
+}

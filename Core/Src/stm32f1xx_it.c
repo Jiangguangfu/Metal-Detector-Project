@@ -24,6 +24,7 @@
 #include "task.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "key_task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -173,7 +174,7 @@ void SysTick_Handler(void)
   }
 #endif /* INCLUDE_xTaskGetSchedulerState */
   /* USER CODE BEGIN SysTick_IRQn 1 */
-
+  Key_Task_1msTickISR();
   /* USER CODE END SysTick_IRQn 1 */
 }
 

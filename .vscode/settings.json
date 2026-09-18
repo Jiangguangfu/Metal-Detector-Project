@@ -1,0 +1,18 @@
+{
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "clangd.arguments": [
+        "--background-index",
+        "--clang-tidy=false",
+        "--header-insertion=never",
+        "--query-driver=/usr/bin/arm-none-eabi-gcc"
+    ],
+
+    "metal.armToolchainBin": "/usr/bin",
+    "metal.gdbPath": "/usr/bin/gdb-multiarch",
+    "metal.buildDir": "build/Debug",
+    "metal.targetName": "BASE_PROJECT",
+    "metal.openocdInterface": "interface/stlink.cfg",
+    "metal.openocdTarget": "target/stm32f1x.cfg",
+    "metal.stlinkDevice": "STM32F103C8",
+    "metal.cubeProgrammer": "/mnt/c/Program Files/STMicroelectronics/STM32Cube/STM32CubeProgrammer/bin/STM32_Programmer_CLI.exe"
+}

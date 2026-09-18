@@ -1,0 +1,151 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Sync compile_commands.json",
+            "type": "shell",
+            "command": "cp",
+            "args": [
+                "${workspaceFolder}/${config:metal.buildDir}/compile_commands.json",
+                "${workspaceFolder}/compile_commands.json"
+            ],
+            "presentation": {
+                "reveal": "silent",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Configure firmware (arm-none-eabi)",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "-lc",
+                "cmake -S \"${workspaceFolder}\" -B \"${workspaceFolder}/${config:metal.buildDir}\" -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=\"${workspaceFolder}/cmake/gcc-arm-none-eabi.cmake\" && cp \"${workspaceFolder}/${config:metal.buildDir}/compile_commands.json\" \"${workspaceFolder}/compile_commands.json\""
+            ],
+            "options": {
+                "env": {
+                    "PATH": "${config:metal.armToolchainBin}:${env:PATH}",
+                    "CFLAGS": "",
+                    "CXXFLAGS": "",
+                    "CPPFLAGS": "",
+                    "LDFLAGS": "",
+                    "ASMFLAGS": ""
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build firmware inc (arm-none-eabi)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/${config:metal.buildDir}",
+                "--target",
+                "${config:metal.targetName}",
+                "--parallel"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "${config:metal.armToolchainBin}:${env:PATH}",
+                    "CFLAGS": "",
+                    "CXXFLAGS": "",
+                    "CPPFLAGS": "",
+                    "LDFLAGS": "",
+                    "ASMFLAGS": ""
+                }
+            },
+            "dependsOn": "Configure firmware (arm-none-eabi)",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": false
+            },
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "Build firmware full (arm-none-eabi)",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/${config:metal.buildDir}",
+                "--target",
+                "${config:metal.targetName}",
+                "--parallel",
+                "--clean-first"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "${config:metal.armToolchainBin}:${env:PATH}",
+                    "CFLAGS": "",
+                    "CXXFLAGS": "",
+                    "CPPFLAGS": "",
+                    "LDFLAGS": "",
+                    "ASMFLAGS": ""
+                }
+            },
+            "dependsOn": "Configure firmware (arm-none-eabi)",
+            "presentation": {
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": false
+            },
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "Flash firmware (ST-Link OpenOCD)",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "${workspaceFolder}/tools/scripts/flash_stlink_openocd.sh"
+            ],
+            "options": {
+                "env": {
+                    "PATH": "${config:metal.armToolchainBin}:${env:PATH}"
+                }
+            },
+            "dependsOn": "Build firmware inc (arm-none-eabi)",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Flash firmware (ST-Link CubeProgrammer)",
+            "type": "shell",
+            "command": "bash",
+            "args": [
+                "${workspaceFolder}/tools/scripts/flash_stlink_cube.sh"
+            ],
+            "dependsOn": "Build firmware inc (arm-none-eabi)",
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "focus": true,
+                "panel": "dedicated",
+                "showReuseMessage": false
+            },
+            "problemMatcher": []
+        }
+    ]
+}
