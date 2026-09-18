@@ -1,0 +1,25 @@
+# CMake / Ninja build output
+build/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+compile_commands.json
+
+# Compiled binaries
+*.o
+*.obj
+*.elf
+*.bin
+*.hex
+*.map
+*.lst
+*.d
+*.su
+*.cyclo
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*~
