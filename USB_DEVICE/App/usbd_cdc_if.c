@@ -153,7 +153,7 @@ static int8_t CDC_Init_FS(void)
   /* Set Application Buffers */
   USBD_CDC_SetTxBuffer(&hUsbDeviceFS, UserTxBufferFS, 0);
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, UserRxBufferFS);
-  CDC_Task_SetUSBConnected(true);
+  CDC_Task_SetUSBConnected(true);   /* USB 接口初始化完成 */
   return (USBD_OK);
   /* USER CODE END 3 */
 }
@@ -230,6 +230,7 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
     case CDC_SET_CONTROL_LINE_STATE:
       if (pbuf != NULL) {
         USBD_SetupReqTypedef *req = (USBD_SetupReqTypedef *)pbuf;
+        /* DTR=1 视为主机打开了串口 */
         CDC_Task_SetUSBConnected((req->wValue & 0x0001U) != 0U);
       }
     break;
@@ -264,7 +265,7 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-  CDC_Task_ReceiveData(Buf, (uint16_t)(*Len));
+  CDC_Task_ReceiveData(Buf, (uint16_t)(*Len));   /* 拷进环形缓冲，任务里按行解析 */
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
   return (USBD_OK);

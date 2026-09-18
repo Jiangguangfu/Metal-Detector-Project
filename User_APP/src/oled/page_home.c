@@ -19,6 +19,7 @@ void lcd_page_home_handle_key(uint8_t key_id, uint8_t event_type)
     s_last_key_tick = osKernelGetTickCount();
 }
 
+/* 128x32 共 4 行：标题 / 电压+USB / LC+LED / 按键 */
 void lcd_page_home_render(void)
 {
     adc_data_t adc = {0};

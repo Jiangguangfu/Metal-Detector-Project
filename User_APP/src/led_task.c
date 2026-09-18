@@ -11,9 +11,10 @@ static osMutexId_t ledMutex;
 static StackType_t ledTaskStack[USER_CONFIG_LED_TASK_STACK_SIZE];
 static StaticTask_t ledTaskTCB;
 static bool gpio_led[GPIO_LED_COUNT];
-static bool led1_manual;
-static bool led2_manual;
+static bool led1_manual;    /* 手动接管后不再心跳 */
+static bool led2_manual;    /* 手动接管后不再跟随 USB */
 
+/* 逻辑亮灭 → 原理图低电平点亮 */
 static void gpio_led_apply(void)
 {
     HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin,
@@ -34,6 +35,7 @@ static void LED_Task(void *argument)
     for (;;) {
         uint32_t now = osKernelGetTickCount();
         if (osMutexAcquire(ledMutex, 10) == osOK) {
+            /* LED1：默认心跳；LED2：默认表示 USB 已连接 */
             if (!led1_manual && (now - last_hb) >= USER_CONFIG_LED_HEARTBEAT_MS) {
                 gpio_led[LED_INDEX_LED1] = !gpio_led[LED_INDEX_LED1];
                 last_hb = now;

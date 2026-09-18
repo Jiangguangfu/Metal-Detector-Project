@@ -1,4 +1,4 @@
-/* OLED SSD1306 0.91" 128x32 over I2C1 (PB6 SCL / PB7 SDA, 4.7k pull-up) */
+/* OLED：0.91" SSD1306 128x32，I2C1 PB6 SCL / PB7 SDA，板级 4.7k 上拉 */
 #include "lcd_task.h"
 #include "lcd_pages.h"
 #include "lcd_priv.h"
@@ -44,6 +44,7 @@ bool lcd_buffer_dirty;
 lcd_status_t lcd_status;
 static uint8_t s_i2c_addr = (uint8_t)(USER_CONFIG_LCD_I2C_ADDR_7BIT << 1);
 
+/* control：0x00 命令，0x40 数据。每次最多带 16 字节，避免大栈缓冲 */
 static HAL_StatusTypeDef LCD_I2C_Write(uint8_t control, const uint8_t *data, uint16_t len)
 {
     uint8_t chunk[17];
@@ -72,14 +73,15 @@ static HAL_StatusTypeDef LCD_I2C_Write(uint8_t control, const uint8_t *data, uin
 
 static void LCD_WriteCommand(uint8_t cmd)
 {
-    (void)LCD_I2C_Write(0x00u, &cmd, 1u);
+    (void)LCD_I2C_Write(0x00u, &cmd, 1u);   /* Co=0, D/C#=0：命令 */
 }
 
 static void LCD_WriteDataBlock(const uint8_t *data, uint16_t len)
 {
-    (void)LCD_I2C_Write(0x40u, data, len);
+    (void)LCD_I2C_Write(0x40u, data, len);  /* Co=0, D/C#=1：显存数据 */
 }
 
+/* 按 128x32 配置：MUX=31，COM pins=0x02 */
 static void SSD1306_Init_Sequence(void)
 {
     LCD_WriteCommand(SSD1306_CMD_DISPLAY_OFF);
@@ -129,6 +131,7 @@ bool LCD_Init(void)
         return false;
     }
 
+    /* 先探 0x3C，没有再试 0x3D */
     if (LCD_ProbeAddress(USER_CONFIG_LCD_I2C_ADDR_7BIT)) {
         s_i2c_addr = (uint8_t)(USER_CONFIG_LCD_I2C_ADDR_7BIT << 1);
     } else if (LCD_ProbeAddress(0x3Du)) {
@@ -198,6 +201,7 @@ void LCD_SetPixel(uint8_t x, uint8_t y, bool color)
     if (osMutexAcquire(lcdMutexHandle, 10) != osOK) {
         return;
     }
+    /* SSD1306 页模式：一页 8 行像素 */
     page = (uint8_t)(y / 8u);
     bit = (uint8_t)(y % 8u);
     index = (uint16_t)(page * LCD_WIDTH + x);
@@ -400,6 +404,7 @@ static void LCD_Task(void *argument)
     (void)argument;
 
     if (!LCD_Init()) {
+        /* 屏不在就停在这里，避免空刷 I2C */
         for (;;) {
             osDelay(1000);
         }

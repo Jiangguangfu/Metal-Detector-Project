@@ -8,7 +8,7 @@
 
 extern TIM_HandleTypeDef htim1;
 
-#define TIM1_TICK_HZ 1000000u
+#define TIM1_TICK_HZ 1000000u   /* PSC=71，72 MHz / 72 = 1 MHz，与 CH2 捕获共用 */
 #define BUZZ_NOTIFY_BEEP  (1u << 0)
 #define BUZZ_NOTIFY_PLAY  (1u << 1)
 #define BUZZ_NOTIFY_STOP  (1u << 2)
@@ -27,12 +27,13 @@ static bool buzzer_pwm_prepare(void)
     if (HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1) != HAL_OK) {
         return false;
     }
-    __HAL_TIM_MOE_ENABLE(&htim1);
+    __HAL_TIM_MOE_ENABLE(&htim1);                 /* 高级定时器必须开主输出 */
     __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
     return true;
 }
 
-/* Same formula as PawDrive TIM3 PWM: f = 1 MHz / (ARR + 1). PSC stays 71 so CH2 capture keeps a 1 MHz tick. */
+/* 与 PawDrive TIM3 PWM 相同：f = 1 MHz / (ARR + 1)。
+ * 发声时改 ARR，静音时 ARR 拉回 0xFFFF，方便 CH2 捕获长间隔。 */
 static void Buzzer_PWM_SetFreq(uint16_t freq_hz, uint8_t volume_percent)
 {
     uint32_t arr;
@@ -82,7 +83,7 @@ static void buzzer_play_sequence(const buzzer_note_t *notes, uint16_t count, uin
     }
 }
 
-/* PawDrive BatAlert：500Hz → 1kHz，100 步 × 10ms ≈ 1s，占空比 40%。 */
+/* PawDrive BatAlert：500 Hz → 1 kHz，100 步 × 10 ms ≈ 1 s，占空比 40% */
 static void buzzer_boot_melody(void)
 {
     const uint32_t f0 = 500u;

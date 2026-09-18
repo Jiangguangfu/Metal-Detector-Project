@@ -10,6 +10,7 @@
 #include "main.h"
 #include "cmsis_os2.h"
 
+/* 按键业务：K1 短按蜂鸣、长按旋律；K2/K3 切换 LED */
 static void user_on_key(const key_event_t *evt, void *user)
 {
     (void)user;
@@ -40,7 +41,7 @@ void user_main(void)
     LED_Task_Create();
     ADC_Task_Create();
     (void)Buzzer_Task_Create();
-    (void)Pulse_Capture_Start();
+    (void)Pulse_Capture_Start();   /* TIM1_CH2 捕获 LC 频率，与蜂鸣器共用 TIM1 */
     (void)CDC_Task_Create();
     LCD_Task_Create();
 }

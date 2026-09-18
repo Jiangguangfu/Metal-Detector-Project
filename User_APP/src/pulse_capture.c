@@ -5,10 +5,10 @@
 
 extern TIM_HandleTypeDef htim1;
 
-#define TIM1_COUNTER_HZ          1000000u
-#define TIM1_IC_EDGE_DIVIDER     8u
-#define CAPTURE_AVERAGE_SAMPLES  8u
-#define CAPTURE_STALE_MS         500u
+#define TIM1_COUNTER_HZ          1000000u   /* 与蜂鸣器 PWM 相同的 1 MHz 时基 */
+#define TIM1_IC_EDGE_DIVIDER     8u         /* CubeMX：每 8 个上升沿捕获一次 */
+#define CAPTURE_AVERAGE_SAMPLES  8u         /* 再对 8 次间隔求平均 */
+#define CAPTURE_STALE_MS         500u       /* 超时认为探头无信号 */
 
 static volatile uint16_t s_previous_capture;
 static volatile uint32_t s_delta_sum;
@@ -54,6 +54,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
         return;
     }
 
+    /* 16 位计数器自然回绕，相减即可得到间隔 */
     delta = (uint16_t)(capture - s_previous_capture);
     s_previous_capture = capture;
     if (delta == 0u) {
@@ -63,6 +64,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
     s_delta_sum += delta;
     s_delta_count++;
     if (s_delta_count >= CAPTURE_AVERAGE_SAMPLES) {
+        /* f = 1 MHz * 8边沿分频 * 8次平均 / ΣΔCNT */
         const uint32_t numerator =
             TIM1_COUNTER_HZ * TIM1_IC_EDGE_DIVIDER * CAPTURE_AVERAGE_SAMPLES;
         s_frequency_hz = numerator / s_delta_sum;

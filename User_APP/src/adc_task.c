@@ -13,7 +13,7 @@ static StaticTask_t adcTaskTCB;
 static adc_data_t adc_data;
 static bool adc_ready;
 static float s_vdda = USER_CONFIG_ADC_VDDA_FALLBACK_V;
-static float s_filt = -1.0f;
+static float s_filt = -1.0f;    /* <0 表示尚未有滤波初值 */
 
 static uint16_t adc_read_channel(uint32_t channel, uint32_t sample_time)
 {
@@ -39,6 +39,7 @@ static uint16_t adc_read_channel(uint32_t channel, uint32_t sample_time)
     }
 }
 
+/* 用内部 1.20 V 基准反推 VDDA，减少 3.3 V 波动带来的误差 */
 static void adc_calibrate_vdda(void)
 {
     uint16_t vref;
@@ -66,6 +67,7 @@ static void ADC_Task(void *argument)
 {
     const float rtop = USER_CONFIG_ADC_DIV_RTOP_OHM;
     const float rbot = USER_CONFIG_ADC_DIV_RBOT_OHM;
+    /* rtop=0 时 div=1，即 PA5 电压等于 POWER_IN */
     const float div = (rtop + rbot) > 0.0f ? (rbot / (rtop + rbot)) : 1.0f;
     (void)argument;
 

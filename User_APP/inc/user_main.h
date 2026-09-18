@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 
+/* USB 初始化完成后由 defaultTask 调用，创建全部 User_APP 任务 */
 void user_main(void);
 
 #ifdef __cplusplus

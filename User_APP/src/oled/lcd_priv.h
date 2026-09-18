@@ -6,10 +6,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-extern uint8_t lcd_buffer[];
+extern uint8_t lcd_buffer[];    /* 页模式显存：page * 128 + x */
 extern bool lcd_buffer_dirty;
 extern lcd_status_t lcd_status;
 
+/* 不加锁版本，供已持有互斥量的渲染路径使用 */
 void LCD_PrintString_Internal(uint8_t x, uint8_t y, const char *str, font_size_t font_size);
 
 #endif /* LCD_PRIV_H */

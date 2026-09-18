@@ -15,7 +15,7 @@
 
 typedef struct {
     uint16_t len;
-    uint8_t data[64];
+    uint8_t data[64];       /* 与 USB FS 全速包长一致 */
 } cdc_tx_item_t;
 
 static osThreadId_t cdcTaskHandle;
@@ -61,7 +61,7 @@ void CDC_Task_ReceiveData(const uint8_t *data, uint16_t len)
     for (i = 0; i < len; i++) {
         uint32_t next = (w + 1u) % USER_CONFIG_CDC_RX_BUFFER_SIZE;
         if (next == rx_r) {
-            break;
+            break;          /* 环形缓冲满则丢后续字节 */
         }
         rx_buf[w] = data[i];
         w = next;
@@ -207,6 +207,7 @@ static void CDC_Task(void *argument)
             }
         }
 
+        /* 从环形缓冲拼出一行再解析 */
         while (rx_r != rx_w) {
             char ch = (char)rx_buf[rx_r];
             rx_r = (rx_r + 1u) % USER_CONFIG_CDC_RX_BUFFER_SIZE;

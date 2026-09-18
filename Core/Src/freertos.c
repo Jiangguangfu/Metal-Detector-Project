@@ -117,7 +117,7 @@ void StartDefaultTask(void *argument)
   /* init code for USB_DEVICE */
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN StartDefaultTask */
-  user_main();
+  user_main();   /* 创建按键/LED/ADC/蜂鸣器/捕获/CDC/OLED 任务 */
   /* Infinite loop */
   for(;;)
   {

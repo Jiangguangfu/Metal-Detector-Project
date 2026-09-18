@@ -174,7 +174,7 @@ void SysTick_Handler(void)
   }
 #endif /* INCLUDE_xTaskGetSchedulerState */
   /* USER CODE BEGIN SysTick_IRQn 1 */
-  Key_Task_1msTickISR();
+  Key_Task_1msTickISR();   /* 按键 1 ms 扫描：消抖、单击/双击/长按 */
   /* USER CODE END SysTick_IRQn 1 */
 }
 

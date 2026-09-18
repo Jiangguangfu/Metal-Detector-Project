@@ -11,13 +11,13 @@
 typedef struct {
     GPIO_TypeDef *port;
     uint16_t pin;
-    uint8_t stable;
+    uint8_t stable;         /* 消抖后的按下状态：1=按下 */
     uint8_t raw_last;
     uint16_t debounce_cnt;
     uint16_t press_ms;
-    uint8_t long_sent;
+    uint8_t long_sent;      /* 本次按下是否已发过长按，避免松开再报单击 */
     uint8_t click_cnt;
-    uint16_t click_window;
+    uint16_t click_window;  /* 双击等待倒计时 */
 } key_ctx_t;
 
 static osThreadId_t keyTaskHandle;
@@ -65,6 +65,7 @@ static void key_on_stable_press(key_ctx_t *k)
 
 static void key_on_stable_release(uint8_t key_id, key_ctx_t *k)
 {
+    /* 长按已经报过事件，松开不再当成单击 */
     if (k->long_sent) {
         k->click_cnt = 0;
         k->click_window = 0;
@@ -111,6 +112,7 @@ static void key_tick_1ms(uint8_t key_id, key_ctx_t *k)
         }
     }
 
+    /* 窗口到期且只有一次松开 → 单击 */
     if (k->click_window > 0u) {
         k->click_window--;
         if (k->click_window == 0u && k->click_cnt == 1u) {
