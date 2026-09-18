@@ -4,7 +4,6 @@
 #include "lcd_priv.h"
 #include "user_config.h"
 #include "key_task.h"
-#include "log_task.h"
 #include "i2c.h"
 #include "cmsis_os2.h"
 #include "FreeRTOS.h"
@@ -401,12 +400,10 @@ static void LCD_Task(void *argument)
     (void)argument;
 
     if (!LCD_Init()) {
-        Log_Print(LOG_LEVEL_ERROR, "[LCD] SSD1306 probe failed");
         for (;;) {
             osDelay(1000);
         }
     }
-    Log_Print(LOG_LEVEL_INFO, "[LCD] SSD1306 I2C ready");
     (void)Key_RegisterCallback(lcd_on_key, NULL);
 
     for (;;) {
@@ -438,11 +435,7 @@ void LCD_Task_Create(void)
     }
     lcdMutexHandle = osMutexNew(&mutex_attr);
     if (lcdMutexHandle == NULL) {
-        Log_Print(LOG_LEVEL_ERROR, "[LCD] mutex failed");
         return;
     }
     lcdTaskHandle = osThreadNew(LCD_Task, NULL, &attr);
-    if (lcdTaskHandle == NULL) {
-        Log_Print(LOG_LEVEL_ERROR, "[LCD] task failed");
-    }
 }

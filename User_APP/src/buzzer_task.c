@@ -1,6 +1,5 @@
 #include "buzzer_task.h"
 #include "user_config.h"
-#include "log_task.h"
 #include "tim.h"
 #include "cmsis_os2.h"
 #include "FreeRTOS.h"
@@ -109,18 +108,13 @@ static void Buzzer_Task(void *argument)
     (void)argument;
 
     if (!buzzer_pwm_prepare()) {
-        Log_Print(LOG_LEVEL_ERROR, "[Buzzer] TIM1 PWM start failed");
         vTaskDelete(NULL);
         return;
     }
-    Log_Print(LOG_LEVEL_INFO, "[Buzzer] TIM1_CH1 PWM ready");
 
 #if USER_CONFIG_BUZZER_BOOT_SONG_ENABLE
-    Log_Print(LOG_LEVEL_INFO, "[Buzzer] startup: delay 2s then sweep 500Hz->1kHz @1s (TIM1_CH1)");
     osDelay(USER_CONFIG_BUZZER_BOOT_DELAY_MS);
     buzzer_boot_melody();
-#else
-    Log_Print(LOG_LEVEL_INFO, "[Buzzer] startup melody disabled");
 #endif
 
     for (;;) {

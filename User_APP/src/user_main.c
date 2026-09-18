@@ -1,6 +1,5 @@
 #include "user_main.h"
 #include "user_config.h"
-#include "log_task.h"
 #include "key_task.h"
 #include "led_task.h"
 #include "adc_task.h"
@@ -17,8 +16,6 @@ static void user_on_key(const key_event_t *evt, void *user)
     if (evt == NULL) {
         return;
     }
-
-    Log_Printf(LOG_LEVEL_INFO, "[Key] id=%u evt=%u", evt->key_id, evt->event_type);
 
     if (evt->event_type == KEY_EVENT_SINGLE_CLICK) {
         if (evt->key_id == KEY_ID_1) {
@@ -38,21 +35,12 @@ static void user_on_key(const key_event_t *evt, void *user)
 
 void user_main(void)
 {
-    Log_Task_Create();
-    Log_Print(LOG_LEVEL_INFO, "[user_main] start");
-
     (void)Key_Task_Create();
     (void)Key_RegisterCallback(user_on_key, NULL);
     LED_Task_Create();
     ADC_Task_Create();
     (void)Buzzer_Task_Create();
-    if (!Pulse_Capture_Start()) {
-        Log_Print(LOG_LEVEL_ERROR, "[Pulse] TIM1_CH2 capture start failed");
-    } else {
-        Log_Print(LOG_LEVEL_INFO, "[Pulse] TIM1_CH2 capture ready");
-    }
+    (void)Pulse_Capture_Start();
     (void)CDC_Task_Create();
     LCD_Task_Create();
-
-    Log_Print(LOG_LEVEL_INFO, "[user_main] tasks ready");
 }

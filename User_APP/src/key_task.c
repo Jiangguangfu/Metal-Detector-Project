@@ -1,6 +1,5 @@
 #include "key_task.h"
 #include "user_config.h"
-#include "log_task.h"
 #include "main.h"
 #include "cmsis_os2.h"
 #include "FreeRTOS.h"
@@ -134,7 +133,6 @@ static void Key_Task(void *argument)
     key_event_t evt;
     (void)argument;
 
-    Log_Print(LOG_LEVEL_INFO, "[Key] started");
     for (;;) {
         if (xQueueReceive(keyEvtQueue, &evt, portMAX_DELAY) == pdTRUE) {
             for (uint32_t i = 0; i < KEY_CB_MAX; i++) {

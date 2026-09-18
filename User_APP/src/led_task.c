@@ -2,7 +2,6 @@
 #include "user_config.h"
 #include "cdc_task.h"
 #include "main.h"
-#include "log_task.h"
 #include "cmsis_os2.h"
 #include "FreeRTOS.h"
 #include "task.h"
@@ -30,7 +29,6 @@ static void LED_Task(void *argument)
     uint32_t last_hb = 0;
     (void)argument;
 
-    Log_Print(LOG_LEVEL_INFO, "[LED] started");
     gpio_led_apply();
 
     for (;;) {

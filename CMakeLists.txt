@@ -45,7 +45,6 @@ add_subdirectory(cmake/stm32cubemx)
 add_library(User_main OBJECT)
 target_sources(User_main PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/User_APP/src/user_main.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/User_APP/src/log_task.c
     ${CMAKE_CURRENT_SOURCE_DIR}/User_APP/src/led_task.c
     ${CMAKE_CURRENT_SOURCE_DIR}/User_APP/src/key_task.c
     ${CMAKE_CURRENT_SOURCE_DIR}/User_APP/src/adc_task.c

@@ -1,6 +1,5 @@
 #include "adc_task.h"
 #include "user_config.h"
-#include "log_task.h"
 #include "adc.h"
 #include "cmsis_os2.h"
 #include "FreeRTOS.h"
@@ -73,8 +72,6 @@ static void ADC_Task(void *argument)
     osDelay(20);
     HAL_ADCEx_Calibration_Start(&hadc1);
     adc_calibrate_vdda();
-    Log_Printf(LOG_LEVEL_INFO, "[ADC] VDDA=%umV",
-               (unsigned)(s_vdda * 1000.0f + 0.5f));
 
     for (;;) {
         uint16_t raw = adc_read_channel(ADC_CHANNEL_5, ADC_SAMPLETIME_55CYCLES_5);

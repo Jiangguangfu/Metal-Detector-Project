@@ -70,9 +70,4 @@
 #define USER_CONFIG_CDC_TX_QUEUE_SIZE           4u
 #define USER_CONFIG_CDC_RX_BUFFER_SIZE          128u
 
-/* -------------------- 日志 -------------------- */
-#define USER_CONFIG_LOG_TASK_STACK_SIZE         128u
-#define USER_CONFIG_LOG_TASK_PRIORITY           osPriorityLow
-#define USER_CONFIG_LOG_QUEUE_DEPTH             4u
-
 #endif /* USER_CONFIG_H */
