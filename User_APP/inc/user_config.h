@@ -53,13 +53,13 @@
 /* -------------------- 蜂鸣器 TIM1_CH1 -------------------- */
 #define USER_CONFIG_BUZZER_TASK_STACK_SIZE      96u
 #define USER_CONFIG_BUZZER_TASK_PRIORITY        osPriorityLow
-#define USER_CONFIG_BUZZER_VOLUME_PERCENT       20u /* OC 翻转模式保留兼容，实际占空比 50% */
+#define USER_CONFIG_BUZZER_VOLUME_PERCENT       20u
 /* 无源蜂鸣器谐振约 2.7kHz（原理图 BUZZER1），Q1 S8050 高电平导通 */
 #define USER_CONFIG_BUZZER_DEFAULT_HZ           2700u
 /* 与 PawDrive BatAlert 开机音一致：延时后 500Hz→1kHz 扫频约 1s */
 #define USER_CONFIG_BUZZER_BOOT_SONG_ENABLE     1
 #define USER_CONFIG_BUZZER_BOOT_DELAY_MS        2000u
-#define USER_CONFIG_BUZZER_BOOT_VOLUME_PERCENT  40u /* OC 翻转模式下实际占空比 50% */
+#define USER_CONFIG_BUZZER_BOOT_VOLUME_PERCENT  40u
 
 /* -------------------- USB CDC -------------------- */
 #define USER_CONFIG_CDC_TASK_STACK_SIZE         128u

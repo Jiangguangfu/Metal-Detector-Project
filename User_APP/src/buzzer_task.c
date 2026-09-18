@@ -22,66 +22,51 @@ static StaticTask_t buzzerTaskTCB;
 static buzzer_note_t s_pending_beep;
 static buzzer_note_t s_song[BUZZ_MAX_NOTES];
 static volatile uint16_t s_song_count;
-static volatile uint16_t s_buzzer_half_period_ticks;
-static volatile bool s_buzzer_active;
 
-static bool buzzer_oc_prepare(void)
+static bool buzzer_pwm_prepare(void)
 {
-    /* PSC/ARR are fixed by MX_TIM1_Init because CH1 and CH2 share CNT. */
-    MODIFY_REG(htim1.Instance->CCMR1, TIM_CCMR1_OC1M, TIM_OCMODE_FORCED_INACTIVE);
-    SET_BIT(htim1.Instance->CCER, TIM_CCER_CC1E);
+    if (HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1) != HAL_OK) {
+        return false;
+    }
     __HAL_TIM_MOE_ENABLE(&htim1);
-    __HAL_TIM_ENABLE(&htim1);
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
     return true;
 }
 
+/* Same formula as PawDrive TIM3 PWM: f = 1 MHz / (ARR + 1). PSC stays 71 so CH2 capture keeps a 1 MHz tick. */
 static void Buzzer_PWM_SetFreq(uint16_t freq_hz, uint8_t volume_percent)
 {
-    uint32_t half_period;
-    (void)volume_percent; /* Output-compare toggle produces a fixed 50% duty cycle. */
+    uint32_t arr;
+    uint32_t ccr;
 
     if (freq_hz == 0u) {
-        taskENTER_CRITICAL();
-        s_buzzer_active = false;
-        CLEAR_BIT(htim1.Instance->DIER, TIM_DIER_CC1IE);
-        CLEAR_BIT(htim1.Instance->CCER, TIM_CCER_CC1E);
-        MODIFY_REG(htim1.Instance->CCMR1, TIM_CCMR1_OC1M, TIM_OCMODE_FORCED_INACTIVE);
-        SET_BIT(htim1.Instance->CCER, TIM_CCER_CC1E);
-        taskEXIT_CRITICAL();
+        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
+        __HAL_TIM_SET_AUTORELOAD(&htim1, 0xFFFFu);
         return;
     }
-
-    half_period = TIM1_TICK_HZ / (2u * (uint32_t)freq_hz);
-    if (half_period == 0u) {
-        half_period = 1u;
-    }
-    if (half_period > 0xFFFFu) {
-        half_period = 0xFFFFu;
+    if (volume_percent > 100u) {
+        volume_percent = 100u;
     }
 
-    taskENTER_CRITICAL();
-    s_buzzer_half_period_ticks = (uint16_t)half_period;
-    CLEAR_BIT(htim1.Instance->CCER, TIM_CCER_CC1E);
-    MODIFY_REG(htim1.Instance->CCMR1, TIM_CCMR1_OC1M, TIM_OCMODE_TOGGLE);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1,
-                          (uint16_t)(__HAL_TIM_GET_COUNTER(&htim1) + half_period));
-    __HAL_TIM_CLEAR_FLAG(&htim1, TIM_FLAG_CC1);
-    SET_BIT(htim1.Instance->DIER, TIM_DIER_CC1IE);
-    SET_BIT(htim1.Instance->CCER, TIM_CCER_CC1E);
+    arr = TIM1_TICK_HZ / (uint32_t)freq_hz;
+    if (arr == 0u) {
+        arr = 1u;
+    }
+    arr -= 1u;
+    if (arr > 0xFFFFu) {
+        arr = 0xFFFFu;
+    }
+
+    __HAL_TIM_DISABLE(&htim1);
+    __HAL_TIM_SET_AUTORELOAD(&htim1, arr);
+    ccr = ((arr + 1u) * (uint32_t)volume_percent) / 100u;
+    if (ccr > arr) {
+        ccr = arr;
+    }
+    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, ccr);
+    __HAL_TIM_SET_COUNTER(&htim1, 0);
     __HAL_TIM_MOE_ENABLE(&htim1);
     __HAL_TIM_ENABLE(&htim1);
-    s_buzzer_active = true;
-    taskEXIT_CRITICAL();
-}
-
-void HAL_TIM_OC_DelayElapsedCallback(TIM_HandleTypeDef *htim)
-{
-    if (htim != NULL && htim->Instance == TIM1 &&
-        htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1 && s_buzzer_active) {
-        uint16_t next = (uint16_t)(__HAL_TIM_GET_COMPARE(htim, TIM_CHANNEL_1) +
-                                   s_buzzer_half_period_ticks);
-        __HAL_TIM_SET_COMPARE(htim, TIM_CHANNEL_1, next);
-    }
 }
 
 static void buzzer_play_sequence(const buzzer_note_t *notes, uint16_t count, uint8_t volume)
@@ -98,8 +83,7 @@ static void buzzer_play_sequence(const buzzer_note_t *notes, uint16_t count, uin
     }
 }
 
-/* PawDrive BatAlert：500Hz → 1kHz，100 步 × 10ms ≈ 1s。
- * 共用计数器后由输出比较翻转产生固定 50% 占空比。 */
+/* PawDrive BatAlert：500Hz → 1kHz，100 步 × 10ms ≈ 1s，占空比 40%。 */
 static void buzzer_boot_melody(void)
 {
     const uint32_t f0 = 500u;
@@ -124,12 +108,12 @@ static void Buzzer_Task(void *argument)
 {
     (void)argument;
 
-    if (!buzzer_oc_prepare()) {
-        Log_Print(LOG_LEVEL_ERROR, "[Buzzer] TIM1 OC prepare failed");
+    if (!buzzer_pwm_prepare()) {
+        Log_Print(LOG_LEVEL_ERROR, "[Buzzer] TIM1 PWM start failed");
         vTaskDelete(NULL);
         return;
     }
-    Log_Print(LOG_LEVEL_INFO, "[Buzzer] TIM1_CH1 ready");
+    Log_Print(LOG_LEVEL_INFO, "[Buzzer] TIM1_CH1 PWM ready");
 
 #if USER_CONFIG_BUZZER_BOOT_SONG_ENABLE
     Log_Print(LOG_LEVEL_INFO, "[Buzzer] startup: delay 2s then sweep 500Hz->1kHz @1s (TIM1_CH1)");
