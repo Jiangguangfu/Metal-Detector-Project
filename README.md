@@ -18,7 +18,7 @@ STM32F103C8T6 金属探测板固件：FreeRTOS + USB CDC + I2C OLED，用 **ST-L
 
 | 功能 | 引脚 | 说明 |
 |---|---|---|
-| SW1 / SW2 / SW3 | PA0 / PA1 / PA2 | 外部 10k 上拉，按下为低 |
+| SW1 / SW2 / SW3 | PA0 / PA1 / PA2 | 外部下拉，按下为高 |
 | LED1 / LED2 | PA3 / PA4 | 低电平点亮 |
 | POWER_ADC | PA5 | ADC1_IN5，见下方电压采样 |
 | BUZZER | PA8 TIM1_CH1 | Q1 高电平导通，谐振约 2.7 kHz |

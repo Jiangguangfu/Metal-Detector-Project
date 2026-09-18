@@ -11,8 +11,8 @@
 #define USER_CONFIG_KEY_DEBOUNCE_MS             20u
 #define USER_CONFIG_KEY_DOUBLE_WINDOW_MS        250u
 #define USER_CONFIG_KEY_LONG_PRESS_MS           800u
-/* 板级按键：SW1/2/3 外部 10k 上拉 + 100nF，按下为低电平 */
-#define USER_CONFIG_KEY_PRESSED_LEVEL           GPIO_PIN_RESET
+/* 板级按键：SW1/2/3 外部下拉，按下接到高电平 */
+#define USER_CONFIG_KEY_PRESSED_LEVEL           GPIO_PIN_SET
 
 /* -------------------- LED -------------------- */
 #define USER_CONFIG_LED_TASK_STACK_SIZE         96u
